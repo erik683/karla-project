@@ -1,0 +1,3 @@
+export const DISCLAIMER = `IMPORTANT NOTICE: This document was prepared by a patient advocate for informational purposes only. It is NOT medical advice and does NOT constitute a diagnosis, treatment recommendation, or medical opinion. All treatment options, clinical trials, and research findings presented here are intended solely as conversation starters for discussion with qualified medical professionals. Medical decisions should only be made by licensed healthcare providers in consultation with the patient. The patient advocate who prepared this document is not a medical professional.`
+
+export const DISCLAIMER_SHORT = `For informational purposes only — not medical advice. Discuss all options with your medical team.`

@@ -1,0 +1,71 @@
+import type { CareTeamMember } from '../../types/patient'
+
+interface Props {
+  value: CareTeamMember[]
+  onChange: (members: CareTeamMember[]) => void
+}
+
+const empty: CareTeamMember = { name: '', specialty: '', role: '' }
+
+export function CareTeamList({ value, onChange }: Props) {
+  const add = () => onChange([...value, { ...empty }])
+  const remove = (i: number) => onChange(value.filter((_, idx) => idx !== i))
+  const update = (i: number, field: keyof CareTeamMember, v: string) =>
+    onChange(value.map((m, idx) => (idx === i ? { ...m, [field]: v } : m)))
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-gray-500">
+        Note: Care team names are excluded from AI prompts for privacy. Only specialties/roles are shared.
+      </p>
+      {value.length === 0 && (
+        <p className="text-sm text-gray-400 italic">No care team members added yet.</p>
+      )}
+      {value.map((m, i) => (
+        <div key={i} className="flex gap-2 items-center">
+          <input
+            type="text"
+            placeholder="Dr. Name"
+            value={m.name}
+            onChange={(e) => update(i, 'name', e.target.value)}
+            className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="text"
+            placeholder="Specialty (e.g., Oncology)"
+            value={m.specialty}
+            onChange={(e) => update(i, 'specialty', e.target.value)}
+            className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="text"
+            placeholder="Role (e.g., Primary oncologist)"
+            value={m.role}
+            onChange={(e) => update(i, 'role', e.target.value)}
+            className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="button"
+            onClick={() => remove(i)}
+            className="text-red-400 hover:text-red-600 p-1"
+            aria-label="Remove"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={add}
+        className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 font-medium"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+        Add care team member
+      </button>
+    </div>
+  )
+}
