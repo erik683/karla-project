@@ -72,7 +72,6 @@ export interface TrialSearchParams {
   phases: string[]
   statuses: string[]
   location: string
-  radius: string
   age: string
   sex: string
 }

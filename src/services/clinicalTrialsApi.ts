@@ -95,6 +95,7 @@ export async function searchStudies(
 
   if (params.condition) query.set('query.cond', params.condition)
   if (params.interventionType) query.set('query.intr', params.interventionType)
+  if (params.location) query.set('query.locn', params.location)
   if (params.statuses.length > 0) query.set('filter.overallStatus', params.statuses.join(','))
   if (params.phases.length > 0) query.set('filter.phase', params.phases.join(','))
   if (params.age) query.set('filter.age', params.age)

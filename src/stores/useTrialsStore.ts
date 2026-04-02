@@ -10,6 +10,7 @@ interface TrialsStoreState {
   currentParams: TrialSearchParams
   nextPageToken: string | null
   setSearchResults: (results: ClinicalTrialSearchResult[], nextPageToken: string | null) => void
+  appendSearchResults: (results: ClinicalTrialSearchResult[], nextPageToken: string | null) => void
   setSearching: (loading: boolean) => void
   setSearchError: (error: string | null) => void
   openDetail: (nctId: string) => void
@@ -23,7 +24,6 @@ const defaultParams: TrialSearchParams = {
   phases: [],
   statuses: ['RECRUITING'],
   location: '',
-  radius: '100',
   age: '',
   sex: '',
 }
@@ -39,6 +39,8 @@ export const useTrialsStore = create<TrialsStoreState>((set) => ({
 
   setSearchResults: (results, nextPageToken) =>
     set({ searchResults: results, nextPageToken }),
+  appendSearchResults: (results, nextPageToken) =>
+    set((s) => ({ searchResults: [...s.searchResults, ...results], nextPageToken })),
   setSearching: (loading) => set({ isSearching: loading }),
   setSearchError: (error) => set({ searchError: error }),
   openDetail: (nctId) => set({ selectedTrialNctId: nctId, isDetailOpen: true }),
