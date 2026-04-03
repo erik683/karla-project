@@ -49,7 +49,8 @@ Central record of the patient's condition, history, and current treatment status
 
 ### Behavior
 - All fields are manually entered by the advocate
-- Profile data is stored locally (browser storage or local JSON)
+- Profile data is stored locally in IndexedDB via Dexie
+- Full workspace data can be backed up to JSON and restored later
 - A "Profile Summary" button generates a de-identified text block
   suitable for pasting into AI research prompts
 - Version history so you can track how the profile changes over time
@@ -117,9 +118,11 @@ Systematic search and tracking of clinical trials that might be relevant. This m
 ```
 - ClinicalTrials.gov API (primary — free, comprehensive)
   endpoint: https://clinicaltrials.gov/api/v2/studies
-- WHO ICTRP (international trials)
-- EU Clinical Trials Register
-- PubMed (for completed trial results)
+- Additional registries or literature sources can be layered in later, for example:
+  - WHO ICTRP (international trials)
+  - EU Clinical Trials Register
+  - PubMed (for completed trial results)
+  But are not part of the current implementation at this point.
 ```
 
 ### Search Parameters
@@ -154,7 +157,7 @@ Each result shows:
 ### Behavior
 - Saved searches that can be re-run periodically
 - "Watch" a trial for status changes
-- Export trial list as a clean summary for doctor visits
+- Export current search results as CSV for doctor visits or offline review
 
 ---
 
@@ -197,6 +200,12 @@ This is primarily an AI-driven analysis module. The workflow:
 4. **Output**: Structured analysis saved as a dated entry,
    tagged with which research items informed it
 
+### Current Implementation Notes
+- Runs against Anthropic's Messages API using a user-provided Claude API key
+- Supports prompt preview/editing before execution
+- Streams results into the UI while the analysis is running
+- Saves completed analyses to local history for later review
+
 ---
 
 ## Module 5: Doctor Brief Builder
@@ -236,21 +245,21 @@ APPENDIX
 ```
 
 ### Behavior
-- Drag-and-drop items from Research Queue and Trial Finder
-  into the brief
+- Add flagged research items and relevant trials from the side panel
+  into the brief editor
 - Auto-generates the summary and questions using AI
   (with full context injection)
-- Export as PDF or printable HTML
+- Preview the brief, then export as PDF or use browser print
 - Version history (Brief v1, v2, etc. as research evolves)
 
 ---
 
 ## Technical Implementation Notes
 
-### Stack Recommendation
+### Current Stack
 ```
 Frontend:    React (single-page app)
-State:       Zustand or Redux (lots of cross-module state)
+State:       Zustand
 Storage:     IndexedDB via Dexie.js (structured local storage,
              no server needed, data stays on your machine)
 Styling:     Tailwind CSS
@@ -258,7 +267,8 @@ AI Layer:    Anthropic API (Claude) for research synthesis
              and analysis; calls made client-side with
              user-provided API key
 Trials API:  ClinicalTrials.gov v2 API (free, no auth needed)
-PDF Export:  jsPDF + html2canvas, or react-pdf
+PDF Export:  jsPDF + html2canvas
+Testing:     Vitest + Testing Library
 ```
 
 ### Data Privacy Considerations
@@ -270,6 +280,8 @@ PDF Export:  jsPDF + html2canvas, or react-pdf
 - API calls to ClinicalTrials.gov are public/anonymous
 - Patient profile should use initials only, never full name
 - Export files are generated client-side
+- Backup files are generated client-side as JSON and restored only
+  after explicit user confirmation
 - Add a prominent disclaimer on every exported document:
   "This research summary was compiled by a patient advocate
    using AI-assisted tools. It is not medical advice. All
@@ -329,14 +341,14 @@ Phase 4: Analysis
 
 Phase 5: Output
   - Doctor Brief Builder
-  - PDF/HTML export
+  - Preview, PDF export, and print flow
   - Disclaimer injection on all outputs
 
 Phase 6: Polish
   - Cross-module linking (click a trial reference in a
     brief → opens trial detail)
   - Notification system for trial status changes
-  - Data backup/restore (JSON export/import)
+  - Additional restore validation / schema migration handling
 ```
 
 ---
@@ -360,3 +372,13 @@ Phase 6: Polish
    based on what the doctor said
 8. Repeat
 ```
+
+---
+
+## Addendum (2026-04-03)
+
+- Current repo status: the workspace is beyond scaffold stage and already includes the full five-module shell, local Dexie persistence, live ClinicalTrials.gov search, Claude-backed analysis/brief generation, PDF export, and backup/restore plumbing.
+- Main stabilization gaps observed during sweep: automated test coverage is still minimal, current local toolchain verification is blocked by the repo using Vite/Vitest versions that require Node 20.19+ while this machine is on Node 18.19.1, and backup/restore needed a safer restore path with clearer UX.
+- Runtime note: the repo now declares its supported Node version in `package.json`, and `.nvmrc` pins `20.19.0` so local shells can align with the Vite/Vitest toolchain before running `build` or `test`.
+- ~~Solidify backup/restore with a user-friendly "Download Data" / "Restore Data" flow and add focused tests around parsing, restore preview, and date-safe import behavior.~~ Completed on 2026-04-03.
+- Follow-up note: backup parsing currently records a schema `version` but does not yet reject newer unsupported versions. Keep this on the addendum list until restore explicitly blocks backups created by future incompatible schema revisions.
