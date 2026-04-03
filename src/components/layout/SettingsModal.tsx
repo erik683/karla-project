@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Modal } from '../shared/Modal'
 import { useSettingsStore } from '../../stores/useSettingsStore'
 import { useAppStore } from '../../stores/useAppStore'
-import { exportBackup, importBackup } from '../../services/backupRestore'
+import { DataBackupSection } from './DataBackupSection'
 
 export function SettingsModal() {
   const { isSettingsOpen, closeSettings, claudeApiKey, saveApiKey } = useSettingsStore()
@@ -18,24 +18,6 @@ export function SettingsModal() {
     await saveApiKey(keyInput.trim())
     addToast('Settings saved')
     closeSettings()
-  }
-
-  const handleExport = async () => {
-    try {
-      await exportBackup()
-      addToast('Backup downloaded')
-    } catch (e) {
-      addToast(`Export failed: ${e instanceof Error ? e.message : 'Unknown error'}`, 'error')
-    }
-  }
-
-  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (!confirm('This will OVERWRITE all current data with the backup. Are you sure?')) return
-    importBackup(file)
-      .then(() => addToast('Data restored from backup'))
-      .catch((err: Error) => addToast(`Import failed: ${err.message}`, 'error'))
   }
 
   return (
@@ -78,25 +60,7 @@ export function SettingsModal() {
           </div>
         </div>
 
-        {/* Data management */}
-        <div className="border-t border-gray-200 pt-5">
-          <h3 className="text-sm font-semibold text-gray-900 mb-1">Data Backup</h3>
-          <p className="text-xs text-gray-500 mb-3">
-            All your data is stored locally in your browser. Export a backup regularly to avoid data loss.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={handleExport}
-              className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-            >
-              Export Backup
-            </button>
-            <label className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
-              Import Backup
-              <input type="file" accept=".json" className="hidden" onChange={handleImport} />
-            </label>
-          </div>
-        </div>
+        <DataBackupSection onToast={addToast} />
 
         {/* Save button */}
         <div className="flex justify-end gap-3 border-t border-gray-200 pt-4">
